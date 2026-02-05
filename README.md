@@ -1,4 +1,4 @@
-<![CDATA[<div align="center">
+<div align="center">
 
 # 📚 Skillshare Sync
 
@@ -153,4 +153,3 @@ Made with ❤️ for offline learners
 **If you find this useful, consider ⭐ starring the repo!**
 
 </div>
-]]>
