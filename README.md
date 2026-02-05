@@ -5,7 +5,6 @@
 **Your Personal Offline Learning Companion**
 
 [![Electron](https://img.shields.io/badge/Electron-33.0-47848F?style=flat-square&logo=electron&logoColor=white)](https://www.electronjs.org/)
-[![Python](https://img.shields.io/badge/Python-3.8+-3776AB?style=flat-square&logo=python&logoColor=white)](https://python.org)
 [![yt-dlp](https://img.shields.io/badge/Powered%20by-yt--dlp-red?style=flat-square)](https://github.com/yt-dlp/yt-dlp)
 [![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
 
@@ -13,7 +12,7 @@
 
 A desktop application to help you save your **purchased** Skillshare lessons for personal offline viewing.
 
-[Features](#-features) • [Installation](#-installation) • [Usage](#-usage) • [Disclaimer](#%EF%B8%8F-disclaimer)
+[Features](#-features) • [Installation](#-installation) • [yt-dlp Setup](#-yt-dlp-setup) • [Disclaimer](#%EF%B8%8F-disclaimer)
 
 </div>
 
@@ -21,97 +20,109 @@ A desktop application to help you save your **purchased** Skillshare lessons for
 
 ## ✨ Features
 
-### 🖥️ Desktop Application (Electron)
-
 - **Native Desktop Experience** — Browse Skillshare in a dedicated window
 - **One-Click Downloads** — Floating download button appears when watching lessons  
 - **Automatic Subtitles** — Downloads and embeds subtitles when available
 - **Smart File Naming** — Saves files with proper lesson titles
 
-### 🤖 Telegram Bot
-
-- **Multi-Platform Support** — Works with YouTube, Twitter, Instagram, TikTok & 1000+ sites
-- **No File Size Limits** — Large files are automatically split into parts
-- **Format Selection** — Choose between video (best quality) or MP3 audio
-- **Self-Hosted** — Run your own private instance
-
 ---
 
 ## 📦 Installation
 
-### Prerequisites
+### Option 1: Download AppImage (Recommended)
 
-- [Node.js](https://nodejs.org/) 18 or higher
-- [yt-dlp](https://github.com/yt-dlp/yt-dlp) installed and available in PATH
-- Python 3.8+ (for Telegram bot)
+1. Download the latest `.AppImage` from [Releases](https://github.com/Faykar78/Skillshare-sync/releases)
+2. Make it executable:
+   ```bash
+   chmod +x Skillshare_Sync-*.AppImage
+   ```
+3. Run it!
 
-### Desktop App
+### Option 2: Build from Source
 
 ```bash
-cd skillshare-app
+git clone https://github.com/Faykar78/Skillshare-sync.git
+cd Skillshare-sync/skillshare-app
 npm install
 npm start
 ```
 
-### Telegram Bot
+---
 
+## 🔧 yt-dlp Setup
+
+This app requires **yt-dlp** to be installed on your system. yt-dlp is a powerful video downloader that handles the actual downloading process.
+
+### Linux
+
+**Ubuntu/Debian:**
 ```bash
-pip install python-telegram-bot yt-dlp
+sudo apt update
+sudo apt install yt-dlp
 ```
 
-Edit `yt_dlp_bot.py` and add your bot token:
-
-```python
-BOT_TOKEN = "your_bot_token_here"
-```
-
-Then run:
-
+**Or via pip (recommended for latest version):**
 ```bash
-python3 yt_dlp_bot.py
+pip install -U yt-dlp
 ```
+
+**Or download binary:**
+```bash
+sudo curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /usr/local/bin/yt-dlp
+sudo chmod a+rx /usr/local/bin/yt-dlp
+```
+
+### macOS
+
+**Using Homebrew:**
+```bash
+brew install yt-dlp
+```
+
+**Or via pip:**
+```bash
+pip install -U yt-dlp
+```
+
+### Windows
+
+**Using winget:**
+```bash
+winget install yt-dlp
+```
+
+**Using pip:**
+```bash
+pip install -U yt-dlp
+```
+
+**Or download the exe** from [yt-dlp releases](https://github.com/yt-dlp/yt-dlp/releases) and add it to your PATH.
+
+### Verify Installation
+
+After installation, verify yt-dlp is accessible:
+```bash
+yt-dlp --version
+```
+
+You should see a version number like `2024.12.23`. If you get "command not found", make sure yt-dlp is in your system PATH.
 
 ---
 
 ## 📁 Usage
 
-### Desktop App
-
-1. Launch the app with `npm start`
+1. Launch Skillshare Sync
 2. Log in to your Skillshare account
-3. Navigate to any lesson
+3. Navigate to any lesson you have access to
 4. Click the green **"Download Video"** button that appears
 5. Select your download location
-
-### Telegram Bot
-
-1. Start your bot with `python3 yt_dlp_bot.py`
-2. Send `/start` to your bot on Telegram
-3. Paste any video URL
-4. Choose your preferred format (Video or MP3)
-5. Receive the file in your chat
-
----
-
-## 📂 Project Structure
-
-```
-skillshare-sync/
-├── skillshare-app/
-│   ├── main.js           # Electron main process
-│   ├── preload.js        # Renderer bridge & UI injection
-│   ├── package.json      # Dependencies
-│   └── icon.ico          # App icon
-├── yt_dlp_bot.py         # Telegram bot
-├── .gitignore
-└── README.md
-```
+6. Done! Video with embedded subtitles will be saved.
 
 ---
 
 ## ⚠️ Disclaimer
 
-> **FOR PERSONAL USE ONLY**
+> ### 🔒 FOR PERSONAL USE ONLY
 >
 > This software is provided **exclusively** for personal, educational backup purposes of content you have **legitimately purchased** or have authorized access to.
 >
