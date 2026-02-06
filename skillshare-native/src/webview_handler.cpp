@@ -2,7 +2,6 @@
 #include "downloader.h"
 #include <fstream>
 #include <sstream>
-#include <regex>
 
 using namespace Microsoft::WRL;
 
@@ -60,7 +59,7 @@ bool WebViewHandler::Initialize() {
         return false;
     }
 
-    // Wait for initialization (simplified - in production use events)
+    // Wait for initialization
     MSG msg;
     while (!m_webview && GetMessage(&msg, nullptr, 0, 0)) {
         TranslateMessage(&msg);
@@ -80,23 +79,26 @@ void WebViewHandler::SetupWebResourceFilter() {
     m_webview->add_WebResourceRequested(
         Callback<ICoreWebView2WebResourceRequestedEventHandler>(
             [this](ICoreWebView2* sender, ICoreWebView2WebResourceRequestedEventArgs* args) -> HRESULT {
-                wil::com_ptr<ICoreWebView2WebResourceRequest> request;
+                ComPtr<ICoreWebView2WebResourceRequest> request;
                 args->get_Request(&request);
 
-                wil::unique_cotaskmem_string uri;
+                LPWSTR uri = nullptr;
                 request->get_Uri(&uri);
 
-                std::wstring urlStr(uri.get());
-                
-                // Check if it's an m3u8 URL
-                if (urlStr.find(L".m3u8") != std::wstring::npos) {
-                    m_currentM3U8Url = urlStr;
+                if (uri) {
+                    std::wstring urlStr(uri);
+                    CoTaskMemFree(uri);
                     
-                    // Inject download button
-                    InjectDownloadButton(urlStr);
-                    
-                    if (m_m3u8Callback) {
-                        m_m3u8Callback(urlStr);
+                    // Check if it's an m3u8 URL
+                    if (urlStr.find(L".m3u8") != std::wstring::npos) {
+                        m_currentM3U8Url = urlStr;
+                        
+                        // Inject download button
+                        InjectDownloadButton(urlStr);
+                        
+                        if (m_m3u8Callback) {
+                            m_m3u8Callback(urlStr);
+                        }
                     }
                 }
 
@@ -108,24 +110,27 @@ void WebViewHandler::SetupWebResourceFilter() {
     m_webview->add_WebMessageReceived(
         Callback<ICoreWebView2WebMessageReceivedEventHandler>(
             [this](ICoreWebView2* sender, ICoreWebView2WebMessageReceivedEventArgs* args) -> HRESULT {
-                wil::unique_cotaskmem_string message;
+                LPWSTR message = nullptr;
                 args->TryGetWebMessageAsString(&message);
 
-                std::wstring msgStr(message.get());
+                if (message) {
+                    std::wstring msgStr(message);
+                    CoTaskMemFree(message);
 
-                // Parse download request: "DOWNLOAD|url|title"
-                if (msgStr.find(L"DOWNLOAD|") == 0) {
-                    size_t firstPipe = msgStr.find(L'|');
-                    size_t secondPipe = msgStr.find(L'|', firstPipe + 1);
-                    
-                    if (secondPipe != std::wstring::npos) {
-                        std::wstring url = msgStr.substr(firstPipe + 1, secondPipe - firstPipe - 1);
-                        std::wstring title = msgStr.substr(secondPipe + 1);
+                    // Parse download request: "DOWNLOAD|url|title"
+                    if (msgStr.find(L"DOWNLOAD|") == 0) {
+                        size_t firstPipe = msgStr.find(L'|');
+                        size_t secondPipe = msgStr.find(L'|', firstPipe + 1);
+                        
+                        if (secondPipe != std::wstring::npos) {
+                            std::wstring url = msgStr.substr(firstPipe + 1, secondPipe - firstPipe - 1);
+                            std::wstring title = msgStr.substr(secondPipe + 1);
 
-                        // Show folder picker
-                        std::wstring outputDir = Downloader::SelectFolder(m_parentWindow);
-                        if (!outputDir.empty() && g_downloader) {
-                            g_downloader->Download(url, title, outputDir);
+                            // Show folder picker
+                            std::wstring outputDir = Downloader::SelectFolder(m_parentWindow);
+                            if (!outputDir.empty() && g_downloader) {
+                                g_downloader->Download(url, title, outputDir);
+                            }
                         }
                     }
                 }

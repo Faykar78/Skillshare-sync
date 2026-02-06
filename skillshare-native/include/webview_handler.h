@@ -2,6 +2,7 @@
 
 #include <windows.h>
 #include <wrl.h>
+#include <wrl/client.h>
 #include <wil/com.h>
 #include <WebView2.h>
 #include <string>
@@ -25,9 +26,9 @@ private:
     std::wstring LoadInjectScript();
 
     HWND m_parentWindow;
-    wil::com_ptr<ICoreWebView2Controller> m_controller;
-    wil::com_ptr<ICoreWebView2> m_webview;
-    wil::com_ptr<ICoreWebView2Environment> m_environment;
+    Microsoft::WRL::ComPtr<ICoreWebView2Controller> m_controller;
+    Microsoft::WRL::ComPtr<ICoreWebView2> m_webview;
+    Microsoft::WRL::ComPtr<ICoreWebView2Environment> m_environment;
     
     std::function<void(const std::wstring&)> m_m3u8Callback;
     std::wstring m_currentM3U8Url;

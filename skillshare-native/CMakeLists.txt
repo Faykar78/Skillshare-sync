@@ -9,13 +9,22 @@ if(WIN32)
     set(CMAKE_WIN32_EXECUTABLE ON)
 endif()
 
-# Include FetchContent for WebView2
+# Include FetchContent
 include(FetchContent)
 
-# Download WebView2 NuGet package
+# Download Windows Implementation Library (WIL)
+FetchContent_Declare(
+    wil
+    GIT_REPOSITORY https://github.com/microsoft/wil.git
+    GIT_TAG v1.0.231216.1
+)
+FetchContent_MakeAvailable(wil)
+
+# Download WebView2 SDK
 FetchContent_Declare(
     webview2
     URL https://www.nuget.org/api/v2/package/Microsoft.Web.WebView2/1.0.2210.55
+    DOWNLOAD_NAME webview2.zip
     DOWNLOAD_EXTRACT_TIMESTAMP TRUE
 )
 FetchContent_MakeAvailable(webview2)
@@ -39,12 +48,13 @@ set(HEADERS
 )
 
 # Create executable
-add_executable(${PROJECT_NAME} WIN32 ${SOURCES} ${HEADERS} resources/app.rc)
+add_executable(${PROJECT_NAME} WIN32 ${SOURCES} ${HEADERS})
 
 # Include directories
 target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_SOURCE_DIR}/include
     ${WEBVIEW2_INCLUDE_DIR}
+    ${wil_SOURCE_DIR}/include
 )
 
 # Link libraries
