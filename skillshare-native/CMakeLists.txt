@@ -12,19 +12,18 @@ endif()
 # Include FetchContent
 include(FetchContent)
 
-# Download Windows Implementation Library (WIL)
+# Download Windows Implementation Library (WIL) via URL instead of git
 FetchContent_Declare(
     wil
-    GIT_REPOSITORY https://github.com/microsoft/wil.git
-    GIT_TAG v1.0.231216.1
+    URL https://github.com/microsoft/wil/archive/refs/tags/v1.0.231216.1.zip
+    DOWNLOAD_EXTRACT_TIMESTAMP TRUE
 )
 FetchContent_MakeAvailable(wil)
 
-# Download WebView2 SDK
+# Download WebView2 SDK from NuGet
 FetchContent_Declare(
     webview2
     URL https://www.nuget.org/api/v2/package/Microsoft.Web.WebView2/1.0.2210.55
-    DOWNLOAD_NAME webview2.zip
     DOWNLOAD_EXTRACT_TIMESTAMP TRUE
 )
 FetchContent_MakeAvailable(webview2)
@@ -47,7 +46,7 @@ set(HEADERS
     include/downloader.h
 )
 
-# Create executable
+# Create executable (without resource file for now - causes issues with windres)
 add_executable(${PROJECT_NAME} WIN32 ${SOURCES} ${HEADERS})
 
 # Include directories
@@ -74,7 +73,7 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     "$<TARGET_FILE_DIR:${PROJECT_NAME}>"
 )
 
-# Copy inject.js to output directory
+# Copy inject.js to output directory  
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
     "${CMAKE_SOURCE_DIR}/resources/inject.js"
