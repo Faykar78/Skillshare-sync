@@ -4,6 +4,7 @@
 
 **Your Personal Offline Learning Companion**
 
+[![Native C++](https://img.shields.io/badge/Native-C++-00599C?style=flat-square&logo=cplusplus&logoColor=white)](skillshare-native/)
 [![Electron](https://img.shields.io/badge/Electron-33.0-47848F?style=flat-square&logo=electron&logoColor=white)](https://www.electronjs.org/)
 [![yt-dlp](https://img.shields.io/badge/Powered%20by-yt--dlp-red?style=flat-square)](https://github.com/yt-dlp/yt-dlp)
 [![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
@@ -29,7 +30,15 @@ A desktop application to help you save your **purchased** Skillshare lessons for
 
 ## 📦 Installation
 
-### Option 1: Download AppImage (Recommended)
+### Windows (Native C++ App) — Recommended
+
+Lightweight native Windows app (~2MB) using WebView2.
+
+1. Download `SkillshareSync-Windows-x64.zip` from [Releases](https://github.com/Faykar78/Skillshare-sync/releases)
+2. Extract and run `SkillshareSync.exe`
+3. Ensure [WebView2 Runtime](https://developer.microsoft.com/en-us/microsoft-edge/webview2/) is installed (pre-installed on Windows 11)
+
+### Linux (Electron AppImage)
 
 1. Download the latest `.AppImage` from [Releases](https://github.com/Faykar78/Skillshare-sync/releases)
 2. Make it executable:
@@ -38,11 +47,19 @@ A desktop application to help you save your **purchased** Skillshare lessons for
    ```
 3. Run it!
 
-### Option 2: Build from Source
+### Build from Source
 
+**Windows Native (requires Visual Studio):**
+```powershell
+cd skillshare-native
+mkdir build && cd build
+cmake .. -G "Visual Studio 17 2022" -A x64
+cmake --build . --config Release
+```
+
+**Electron (cross-platform):**
 ```bash
-git clone https://github.com/Faykar78/Skillshare-sync.git
-cd Skillshare-sync/skillshare-app
+cd skillshare-app
 npm install
 npm start
 ```
@@ -117,6 +134,17 @@ You should see a version number like `2024.12.23`. If you get "command not found
 4. Click the green **"Download Video"** button that appears
 5. Select your download location
 6. Done! Video with embedded subtitles will be saved.
+
+---
+
+## 📁 Project Structure
+
+```
+skillshare-sync/
+├── skillshare-native/    # Native C++ Windows app (WebView2)
+├── skillshare-app/       # Electron cross-platform app
+└── yt_dlp_bot.py        # Telegram bot for multi-site downloads
+```
 
 ---
 
