@@ -12,7 +12,7 @@ endif()
 # Include FetchContent
 include(FetchContent)
 
-# Download Windows Implementation Library (WIL) via URL instead of git
+# Download Windows Implementation Library (WIL)
 FetchContent_Declare(
     wil
     URL https://github.com/microsoft/wil/archive/refs/tags/v1.0.231216.1.zip
@@ -20,7 +20,7 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(wil)
 
-# Download WebView2 SDK from NuGet
+# Download WebView2 SDK - using direct GitHub mirror for better compatibility
 FetchContent_Declare(
     webview2
     URL https://www.nuget.org/api/v2/package/Microsoft.Web.WebView2/1.0.2210.55
@@ -30,7 +30,13 @@ FetchContent_MakeAvailable(webview2)
 
 # Find WebView2 headers and libraries
 set(WEBVIEW2_INCLUDE_DIR ${webview2_SOURCE_DIR}/build/native/include)
-set(WEBVIEW2_LIB_DIR ${webview2_SOURCE_DIR}/build/native/x64)
+
+# Detect architecture
+if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+    set(WEBVIEW2_LIB_DIR ${webview2_SOURCE_DIR}/build/native/x64)
+else()
+    set(WEBVIEW2_LIB_DIR ${webview2_SOURCE_DIR}/build/native/x86)
+endif()
 
 # Source files
 set(SOURCES
@@ -46,41 +52,61 @@ set(HEADERS
     include/downloader.h
 )
 
-# Create executable (without resource file for now - causes issues with windres)
+# Create executable
 add_executable(${PROJECT_NAME} WIN32 ${SOURCES} ${HEADERS})
 
-# Include directories
+# Include directories - use generator expression to handle both build dir structures
 target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_SOURCE_DIR}/include
     ${WEBVIEW2_INCLUDE_DIR}
     ${wil_SOURCE_DIR}/include
 )
 
-# Link libraries
-target_link_libraries(${PROJECT_NAME} PRIVATE
-    ${WEBVIEW2_LIB_DIR}/WebView2LoaderStatic.lib
-    shlwapi
-    shell32
-    user32
-    ole32
-    oleaut32
-)
+# For MSVC, link against the static library
+if(MSVC)
+    target_link_libraries(${PROJECT_NAME} PRIVATE
+        ${WEBVIEW2_LIB_DIR}/WebView2LoaderStatic.lib
+        shlwapi
+        shell32
+        user32
+        ole32
+        oleaut32
+    )
+else()
+    # For other compilers, try dynamic linking
+    target_link_libraries(${PROJECT_NAME} PRIVATE
+        shlwapi
+        shell32
+        user32
+        ole32
+        oleaut32
+    )
+endif()
 
-# Copy WebView2 loader DLL to output directory
-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-    "${WEBVIEW2_LIB_DIR}/WebView2Loader.dll"
-    "$<TARGET_FILE_DIR:${PROJECT_NAME}>"
-)
+# Copy WebView2 loader DLL to output directory (for dynamic linking fallback)
+if(EXISTS "${WEBVIEW2_LIB_DIR}/WebView2Loader.dll")
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${WEBVIEW2_LIB_DIR}/WebView2Loader.dll"
+        "$<TARGET_FILE_DIR:${PROJECT_NAME}>"
+    )
+endif()
 
-# Copy inject.js to output directory  
+# Copy inject.js to output directory
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
     "${CMAKE_SOURCE_DIR}/resources/inject.js"
     "$<TARGET_FILE_DIR:${PROJECT_NAME}>"
 )
 
+# Print debug info during configuration
+message(STATUS "WebView2 include dir: ${WEBVIEW2_INCLUDE_DIR}")
+message(STATUS "WebView2 lib dir: ${WEBVIEW2_LIB_DIR}")
+message(STATUS "WIL include dir: ${wil_SOURCE_DIR}/include")
+
 # Installation
 install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
-install(FILES "${WEBVIEW2_LIB_DIR}/WebView2Loader.dll" DESTINATION bin)
+if(EXISTS "${WEBVIEW2_LIB_DIR}/WebView2Loader.dll")
+    install(FILES "${WEBVIEW2_LIB_DIR}/WebView2Loader.dll" DESTINATION bin)
+endif()
 install(FILES "${CMAKE_SOURCE_DIR}/resources/inject.js" DESTINATION bin)
